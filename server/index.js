@@ -37,11 +37,12 @@ io.on('connection', async (socket) => {
     console.log('A user disconnected');
   });
 
-  socket.on('chat message', async (msg, username) => {
+  socket.on('chat message', async (msg) => {
     let result;
+    const username = socket.handshake.auth.username ?? 'Anonymous';
     try {
       result = await db.execute({
-        sql: 'INSERT INTO messages (content, username) VALUES (:msg, :username)',
+        sql: 'INSERT INTO messages (content, user) VALUES (:msg, :username)',
         args: {
           msg,
           username
@@ -67,7 +68,7 @@ io.on('connection', async (socket) => {
       });
 
       results.rows.forEach(row => {
-        socket.emit('chat message', row.content, row.id.toString(), row.username);
+        socket.emit('chat message', row.content, row.id.toString(), row.user);
       });
     } catch (err) {
       console.error(err);

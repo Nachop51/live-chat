@@ -14,7 +14,7 @@
         return username
       }
 
-      const newUsername = await fetch('https://random-data-api.com/api/users/random_user')
+      const res = await fetch('https://random-data-api.com/api/users/random_user')
       const { username: randomUsername } = await res.json()
 
       localStorage.setItem('username', randomUsername)
@@ -34,15 +34,23 @@
 
     socket.on('chat message', (msg, serverOffset, username) => {
       const item = document.createElement('li')
-      item.textContent = msg
+      const small = document.createElement('small')
+      const p = document.createElement('p')
+
+      p.textContent = msg
+      small.textContent = username
+      item.appendChild(p)
+      item.appendChild(small)
+
       messages.appendChild(item)
       socket.auth.serverOffset = serverOffset
+      messages.scrollTop = messages.scrollHeight
     })
 
     form.addEventListener('submit', e => {
       e.preventDefault()
       if (input.value) {
-        socket.emit('chat message', input.value, username)
+        socket.emit('chat message', input.value)
         input.value = ''
       }
     })
@@ -75,7 +83,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       width: 350px;
-      height: 100%;
+      max-height: 90vh;
       position: relative;
     }
 
@@ -116,6 +124,10 @@
 
     #messages {
       list-style-type: none;
+      overflow-y: scroll;
+      height: 100%;
+      scroll-behavior: smooth;
+      padding-bottom: 48px;
     }
 
     #messages>li {
